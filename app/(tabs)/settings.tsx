@@ -1,5 +1,5 @@
 import * as ImagePicker from "expo-image-picker";
-import { LogOut, Shield, Upload, X } from "lucide-react-native";
+import { Download, LogOut, Shield, Upload, X } from "lucide-react-native";
 import React, { useState } from "react";
 import { 
   Alert, 
@@ -18,12 +18,17 @@ import AdBanner from "@/components/AdBanner";
 import { AD_CONFIG } from "@/constants/ads";
 import { colors } from "@/constants/colors";
 import { useAuthStore } from "@/hooks/useAuthStore";
+import { useInvoiceStore } from "@/hooks/useInvoiceStore";
 import { useSettingsStore } from "@/hooks/useSettingsStore";
+import { exportInvoicesToCSV, getExportSummary } from "@/utils/csvExport";
+import { formatCurrency } from "@/utils/formatters";
 
 export default function SettingsScreen() {
   const { settings, updateSettings } = useSettingsStore();
+  const { invoices } = useInvoiceStore();
   const { logout } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   
   const [businessName, setBusinessName] = useState(settings.businessName);
   const [businessAddress, setBusinessAddress] = useState(settings.businessAddress);
@@ -118,6 +123,51 @@ Best regards,
           text: "Remove", 
           style: "destructive",
           onPress: () => setLogoUri(undefined)
+        }
+      ]
+    );
+  };
+
+  const handleExportCSV = async () => {
+    if (invoices.length === 0) {
+      Alert.alert(
+        "No Invoices",
+        "You don't have any invoices to export yet.",
+        [{ text: "OK" }]
+      );
+      return;
+    }
+
+    const summary = getExportSummary(invoices);
+    const message = `Export ${summary.totalInvoices} invoices to CSV?\n\nSummary:\n• Total Amount: ${formatCurrency(summary.totalAmount)}\n• Paid: ${formatCurrency(summary.paidAmount)}\n• Unpaid: ${formatCurrency(summary.unpaidAmount)}${summary.dateRange ? `\n• Date Range: ${summary.dateRange.start} - ${summary.dateRange.end}` : ''}`;
+
+    Alert.alert(
+      "Export Invoices",
+      message,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Export",
+          onPress: async () => {
+            setIsExporting(true);
+            try {
+              await exportInvoicesToCSV(invoices);
+              Alert.alert(
+                "Export Successful",
+                `Successfully exported ${invoices.length} invoices to CSV.`,
+                [{ text: "OK" }]
+              );
+            } catch (error) {
+              console.error('Export error:', error);
+              Alert.alert(
+                "Export Failed",
+                error instanceof Error ? error.message : "Failed to export invoices. Please try again.",
+                [{ text: "OK" }]
+              );
+            } finally {
+              setIsExporting(false);
+            }
+          }
         }
       ]
     );
@@ -245,6 +295,24 @@ Best regards,
             disabled={isLoading}
           >
             <Text style={styles.saveButtonText}>Save Settings</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Data Export</Text>
+          <Text style={styles.sectionDescription}>
+            Export all your invoices to a CSV file for backup or analysis in spreadsheet applications.
+          </Text>
+          
+          <TouchableOpacity
+            style={styles.exportButton}
+            onPress={handleExportCSV}
+            disabled={isExporting}
+          >
+            <Download size={20} color={colors.primary} />
+            <Text style={styles.exportButtonText}>
+              {isExporting ? 'Exporting...' : `Export ${invoices.length} Invoices to CSV`}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -463,5 +531,24 @@ const styles = StyleSheet.create({
     color: colors.primary,
     marginTop: 8,
     textAlign: "center",
+  },
+  exportButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.card,
+    borderRadius: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  exportButtonText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: colors.primary,
+    marginLeft: 12,
   },
 });
