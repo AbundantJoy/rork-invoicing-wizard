@@ -37,7 +37,7 @@ export default function YearSummary({
           </Text>
         </View>
         
-        <View style={styles.divider} />
+        <View style={styles.divider}></View>
         
         <View style={styles.detailItem}>
           <Text style={styles.detailLabel}>Unpaid</Text>

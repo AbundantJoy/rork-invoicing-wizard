@@ -371,7 +371,7 @@ export default function CreateInvoiceScreen() {
               <Text style={[styles.lineItemHeaderText, { width: 60, textAlign: "center" }]}>Qty</Text>
               <Text style={[styles.lineItemHeaderText, { width: 60, textAlign: "center" }]}>Price</Text>
               <Text style={[styles.lineItemHeaderText, { width: 70, textAlign: "right", marginRight: 8 }]}>Amount</Text>
-              <View style={{ width: 24 }} />
+              <View style={{ width: 24 }}></View>
             </View>
             
             {lineItems.map(item => (
@@ -472,7 +472,7 @@ export default function CreateInvoiceScreen() {
               <TouchableOpacity
                 style={styles.captureButton}
                 onPress={handleCameraCapture}
-              />
+              ></TouchableOpacity>
               
               <TouchableOpacity
                 style={styles.cameraButton}
