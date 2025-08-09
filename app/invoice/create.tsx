@@ -21,7 +21,7 @@ import { colors } from "@/constants/colors";
 import { useInvoiceStore } from "@/hooks/useInvoiceStore";
 import { useSettingsStore } from "@/hooks/useSettingsStore";
 import { Client, LineItem, Receipt } from "@/types/invoice";
-import { formatDateForInput } from "@/utils/formatters";
+import { formatDateForInput, parseDateFromInput } from "@/utils/formatters";
 
 export default function CreateInvoiceScreen() {
   const router = useRouter();
@@ -179,8 +179,8 @@ export default function CreateInvoiceScreen() {
     try {
       await addInvoice({
         client: selectedClient!,
-        invoiceDate,
-        dueDate: dueDate_,
+        invoiceDate: parseDateFromInput(invoiceDate),
+        dueDate: parseDateFromInput(dueDate_),
         invoiceNumber: invoiceNumber.trim() || undefined,
         poNumber: hasPONumber && poNumber.trim() ? poNumber.trim() : undefined,
         lineItems,
@@ -331,7 +331,7 @@ export default function CreateInvoiceScreen() {
                   style={styles.dateInput}
                   value={invoiceDate}
                   onChangeText={setInvoiceDate}
-                  placeholder="YYYY-MM-DD"
+                  placeholder="MM/DD/YYYY"
                   keyboardType="numbers-and-punctuation"
                 />
               </View>
@@ -345,7 +345,7 @@ export default function CreateInvoiceScreen() {
                   style={styles.dateInput}
                   value={dueDate_}
                   onChangeText={setDueDate}
-                  placeholder="YYYY-MM-DD"
+                  placeholder="MM/DD/YYYY"
                   keyboardType="numbers-and-punctuation"
                 />
               </View>

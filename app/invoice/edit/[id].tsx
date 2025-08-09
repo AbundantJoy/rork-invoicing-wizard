@@ -20,7 +20,7 @@ import ReceiptItem from "@/components/ReceiptItem";
 import { colors } from "@/constants/colors";
 import { useInvoiceStore } from "@/hooks/useInvoiceStore";
 import { LineItem, Receipt } from "@/types/invoice";
-import { formatDateForInput } from "@/utils/formatters";
+import { formatDateForInput, parseDateFromInput } from "@/utils/formatters";
 
 type TabType = "details" | "receipts";
 
@@ -85,8 +85,8 @@ export default function EditInvoiceScreen() {
     setIsLoading(true);
     try {
       await updateInvoice(id, {
-        invoiceDate,
-        dueDate,
+        invoiceDate: parseDateFromInput(invoiceDate),
+        dueDate: parseDateFromInput(dueDate),
         lineItems,
         total,
         isPaid,
@@ -266,7 +266,7 @@ export default function EditInvoiceScreen() {
                     style={styles.dateInput}
                     value={invoiceDate}
                     onChangeText={setInvoiceDate}
-                    placeholder="YYYY-MM-DD"
+                    placeholder="MM/DD/YYYY"
                     keyboardType="numbers-and-punctuation"
                   />
                 </View>
@@ -279,7 +279,7 @@ export default function EditInvoiceScreen() {
                     style={styles.dateInput}
                     value={dueDate}
                     onChangeText={setDueDate}
-                    placeholder="YYYY-MM-DD"
+                    placeholder="MM/DD/YYYY"
                     keyboardType="numbers-and-punctuation"
                   />
                 </View>
