@@ -1,0 +1,467 @@
+import * as ImagePicker from "expo-image-picker";
+import { LogOut, Shield, Upload, X } from "lucide-react-native";
+import React, { useState } from "react";
+import { 
+  Alert, 
+  Image as RNImage,
+  KeyboardAvoidingView, 
+  Platform, 
+  ScrollView, 
+  StyleSheet, 
+  Text, 
+  TextInput, 
+  TouchableOpacity, 
+  View 
+} from "react-native";
+
+import AdBanner from "@/components/AdBanner";
+import { AD_CONFIG } from "@/constants/ads";
+import { colors } from "@/constants/colors";
+import { useAuthStore } from "@/hooks/useAuthStore";
+import { useSettingsStore } from "@/hooks/useSettingsStore";
+
+export default function SettingsScreen() {
+  const { settings, updateSettings } = useSettingsStore();
+  const { logout } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const [businessName, setBusinessName] = useState(settings.businessName);
+  const [businessAddress, setBusinessAddress] = useState(settings.businessAddress);
+  const [businessPhone, setBusinessPhone] = useState(settings.businessPhone);
+  const [businessEmail, setBusinessEmail] = useState(settings.businessEmail);
+  const [emailTemplate, setEmailTemplate] = useState(settings.emailTemplate);
+  const [logoUri, setLogoUri] = useState(settings.logoUri);
+
+  const handleSave = async () => {
+    setIsLoading(true);
+    try {
+      await updateSettings({
+        businessName: businessName.trim(),
+        businessAddress: businessAddress.trim(),
+        businessPhone: businessPhone.trim(),
+        businessEmail: businessEmail.trim(),
+        emailTemplate: emailTemplate.trim(),
+        logoUri,
+      });
+      
+      Alert.alert("Success", "Settings saved successfully!");
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      Alert.alert("Error", "Failed to save settings. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resetToDefault = () => {
+    Alert.alert(
+      "Reset to Default",
+      "Are you sure you want to reset all settings to default values?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Reset", 
+          style: "destructive",
+          onPress: () => {
+            setBusinessName("Your Business");
+            setBusinessAddress("");
+            setBusinessPhone("");
+            setBusinessEmail("");
+            setLogoUri(undefined);
+            setEmailTemplate(`Dear {clientName},
+
+Please find attached Invoice #{invoiceNumber} for your review.
+
+Invoice Details:
+- Invoice Date: {invoiceDate}
+- Due Date: {dueDate}
+- Total Amount: {totalAmount}
+
+Please let me know if you have any questions.
+
+Thank you for your business!
+
+Best regards,
+{businessName}`);
+          }
+        }
+      ]
+    );
+  };
+
+  const handleUploadLogo = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+      
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+        setLogoUri(asset.uri);
+      }
+    } catch (error) {
+      console.error("Error picking logo:", error);
+      Alert.alert("Error", "Failed to pick logo. Please try again.");
+    }
+  };
+
+  const handleRemoveLogo = () => {
+    Alert.alert(
+      "Remove Logo",
+      "Are you sure you want to remove the logo?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Remove", 
+          style: "destructive",
+          onPress: () => setLogoUri(undefined)
+        }
+      ]
+    );
+  };
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={100}
+    >
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Business Logo</Text>
+          <Text style={styles.sectionDescription}>
+            Upload a logo that will appear on your invoice PDFs and previews.
+          </Text>
+          
+          <View style={styles.logoContainer}>
+            {logoUri ? (
+              <View style={styles.logoPreview}>
+                <RNImage source={{ uri: logoUri }} style={styles.logoImage} />
+                <TouchableOpacity
+                  style={styles.removeLogoButton}
+                  onPress={handleRemoveLogo}
+                >
+                  <X size={16} color={colors.danger} />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={styles.uploadLogoButton}
+                onPress={handleUploadLogo}
+              >
+                <Upload size={24} color={colors.primary} />
+                <Text style={styles.uploadLogoText}>Upload Logo</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Business Information</Text>
+          
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Business Name</Text>
+            <TextInput
+              style={styles.input}
+              value={businessName}
+              onChangeText={setBusinessName}
+              placeholder="Your Business Name"
+              placeholderTextColor={colors.textLight}
+            />
+          </View>
+          
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Business Address</Text>
+            <TextInput
+              style={[styles.input, styles.multilineInput]}
+              value={businessAddress}
+              onChangeText={setBusinessAddress}
+              placeholder="Street, City, State, ZIP"
+              placeholderTextColor={colors.textLight}
+              multiline
+              numberOfLines={3}
+            />
+          </View>
+          
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Business Phone</Text>
+            <TextInput
+              style={styles.input}
+              value={businessPhone}
+              onChangeText={setBusinessPhone}
+              placeholder="(123) 456-7890"
+              placeholderTextColor={colors.textLight}
+              keyboardType="phone-pad"
+            />
+          </View>
+          
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Business Email</Text>
+            <TextInput
+              style={styles.input}
+              value={businessEmail}
+              onChangeText={setBusinessEmail}
+              placeholder="business@example.com"
+              placeholderTextColor={colors.textLight}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Email Template</Text>
+          <Text style={styles.sectionDescription}>
+            Customize the email template sent with invoices. Use placeholders: {"{clientName}"}, {"{invoiceNumber}"}, {"{invoiceDate}"}, {"{dueDate}"}, {"{totalAmount}"}, {"{businessName}"}
+          </Text>
+          
+          <View style={styles.formGroup}>
+            <TextInput
+              style={[styles.input, styles.templateInput]}
+              value={emailTemplate}
+              onChangeText={setEmailTemplate}
+              placeholder="Enter your email template..."
+              placeholderTextColor={colors.textLight}
+              multiline
+              numberOfLines={10}
+            />
+          </View>
+        </View>
+
+        <View style={styles.actions}>
+          <TouchableOpacity
+            style={styles.resetButton}
+            onPress={resetToDefault}
+          >
+            <Text style={styles.resetButtonText}>Reset to Default</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.saveButton}
+            onPress={handleSave}
+            disabled={isLoading}
+          >
+            <Text style={styles.saveButtonText}>Save Settings</Text>
+          </TouchableOpacity>
+        </View>
+
+        {AD_CONFIG.SHOW_ADS_ON_HOME && <AdBanner size="medium" />}
+
+        <View style={styles.securitySection}>
+          <Text style={styles.sectionTitle}>Security</Text>
+          
+          <TouchableOpacity
+            style={styles.securityButton}
+            onPress={() => {
+              Alert.alert(
+                "Change Password",
+                "Password change functionality will be available in a future update.",
+                [{ text: "OK" }]
+              );
+            }}
+          >
+            <Shield size={20} color={colors.primary} />
+            <Text style={styles.securityButtonText}>Change Password</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={[styles.securityButton, styles.logoutButton]}
+            onPress={() => {
+              Alert.alert(
+                "Sign Out",
+                "Are you sure you want to sign out?",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  { 
+                    text: "Sign Out", 
+                    style: "destructive",
+                    onPress: logout
+                  }
+                ]
+              );
+            }}
+          >
+            <LogOut size={20} color={colors.danger} />
+            <Text style={[styles.securityButtonText, { color: colors.danger }]}>Sign Out</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  content: {
+    padding: 16,
+    paddingBottom: 32,
+  },
+  section: {
+    marginBottom: 32,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: colors.text,
+    marginBottom: 8,
+  },
+  sectionDescription: {
+    fontSize: 14,
+    color: colors.textLight,
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  formGroup: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: colors.text,
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: colors.card,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: colors.text,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  multilineInput: {
+    minHeight: 100,
+    textAlignVertical: "top",
+  },
+  templateInput: {
+    minHeight: 200,
+    textAlignVertical: "top",
+    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+    fontSize: 14,
+  },
+  actions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 16,
+  },
+  resetButton: {
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    flex: 1,
+    marginRight: 8,
+    alignItems: "center",
+  },
+  resetButtonText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: colors.textLight,
+  },
+  saveButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    flex: 1,
+    marginLeft: 8,
+    alignItems: "center",
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.card,
+  },
+  securitySection: {
+    marginTop: 32,
+    paddingTop: 24,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  securityButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.card,
+    borderRadius: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    marginBottom: 12,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  logoutButton: {
+    borderWidth: 1,
+    borderColor: colors.danger,
+  },
+  securityButtonText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: colors.primary,
+    marginLeft: 12,
+  },
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  logoPreview: {
+    position: "relative",
+    alignItems: "center",
+  },
+  logoImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 8,
+    backgroundColor: colors.card,
+  },
+  removeLogoButton: {
+    position: "absolute",
+    top: -8,
+    right: -8,
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
+  },
+  uploadLogoButton: {
+    backgroundColor: colors.card,
+    borderRadius: 8,
+    paddingVertical: 32,
+    paddingHorizontal: 24,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: colors.border,
+    borderStyle: "dashed",
+    width: 120,
+    height: 120,
+    justifyContent: "center",
+  },
+  uploadLogoText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: colors.primary,
+    marginTop: 8,
+    textAlign: "center",
+  },
+});
