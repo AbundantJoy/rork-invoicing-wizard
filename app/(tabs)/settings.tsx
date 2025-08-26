@@ -1,5 +1,5 @@
 import * as ImagePicker from "expo-image-picker";
-import { Download, LogOut, Shield, Upload, X } from "lucide-react-native";
+import { Download, Upload, X } from "lucide-react-native";
 import React, { useState } from "react";
 import { 
   Alert, 
@@ -17,7 +17,7 @@ import {
 import AdBanner from "@/components/AdBanner";
 import { AD_CONFIG } from "@/constants/ads";
 import { colors } from "@/constants/colors";
-import { useAuthStore } from "@/hooks/useAuthStore";
+
 import { useInvoiceStore } from "@/hooks/useInvoiceStore";
 import { useSettingsStore } from "@/hooks/useSettingsStore";
 import { exportInvoicesToCSV, getExportSummary } from "@/utils/csvExport";
@@ -26,7 +26,7 @@ import { formatCurrency } from "@/utils/formatters";
 export default function SettingsScreen() {
   const { settings, updateSettings } = useSettingsStore();
   const { invoices } = useInvoiceStore();
-  const { logout } = useAuthStore();
+
   const [isLoading, setIsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   
@@ -317,45 +317,6 @@ Best regards,
         </View>
 
         {AD_CONFIG.SHOW_ADS_ON_HOME && <AdBanner size="medium" />}
-
-        <View style={styles.securitySection}>
-          <Text style={styles.sectionTitle}>Security</Text>
-          
-          <TouchableOpacity
-            style={styles.securityButton}
-            onPress={() => {
-              Alert.alert(
-                "Change Password",
-                "Password change functionality will be available in a future update.",
-                [{ text: "OK" }]
-              );
-            }}
-          >
-            <Shield size={20} color={colors.primary} />
-            <Text style={styles.securityButtonText}>Change Password</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={[styles.securityButton, styles.logoutButton]}
-            onPress={() => {
-              Alert.alert(
-                "Sign Out",
-                "Are you sure you want to sign out?",
-                [
-                  { text: "Cancel", style: "cancel" },
-                  { 
-                    text: "Sign Out", 
-                    style: "destructive",
-                    onPress: logout
-                  }
-                ]
-              );
-            }}
-          >
-            <LogOut size={20} color={colors.danger} />
-            <Text style={[styles.securityButtonText, { color: colors.danger }]}>Sign Out</Text>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -452,36 +413,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: colors.card,
   },
-  securitySection: {
-    marginTop: 32,
-    paddingTop: 24,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  securityButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.card,
-    borderRadius: 8,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    marginBottom: 12,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  logoutButton: {
-    borderWidth: 1,
-    borderColor: colors.danger,
-  },
-  securityButtonText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: colors.primary,
-    marginLeft: 12,
-  },
+
   logoContainer: {
     alignItems: "center",
     marginBottom: 16,

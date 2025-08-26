@@ -5,9 +5,8 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { View, StyleSheet } from "react-native";
 
-import AuthGuard from "@/components/AuthGuard";
+import SetupGuard from "@/components/AuthGuard";
 import AppLogo from "@/components/AppLogo";
-import { AuthStoreProvider } from "@/hooks/useAuthStore";
 import { InvoiceStoreProvider } from "@/hooks/useInvoiceStore";
 import { SettingsStoreProvider } from "@/hooks/useSettingsStore";
 
@@ -91,22 +90,9 @@ function RootLayoutNav() {
         }} 
       />
       <Stack.Screen 
-        name="auth/login" 
+        name="setup" 
         options={{ 
           headerShown: false,
-        }} 
-      />
-      <Stack.Screen 
-        name="auth/setup" 
-        options={{ 
-          headerShown: false,
-        }} 
-      />
-      <Stack.Screen 
-        name="auth/reset-password" 
-        options={{ 
-          title: "Reset Password",
-          presentation: "modal",
         }} 
       />
     </Stack>
@@ -121,15 +107,13 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <AuthStoreProvider>
-          <AuthGuard>
-            <SettingsStoreProvider>
-              <InvoiceStoreProvider>
-                <RootLayoutNav />
-              </InvoiceStoreProvider>
-            </SettingsStoreProvider>
-          </AuthGuard>
-        </AuthStoreProvider>
+        <SettingsStoreProvider>
+          <SetupGuard>
+            <InvoiceStoreProvider>
+              <RootLayoutNav />
+            </InvoiceStoreProvider>
+          </SetupGuard>
+        </SettingsStoreProvider>
       </GestureHandlerRootView>
     </QueryClientProvider>
   );

@@ -3,39 +3,34 @@ import React, { useEffect } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 import { colors } from "@/constants/colors";
-import { useAuthStore } from "@/hooks/useAuthStore";
+import { useSettingsStore } from "@/hooks/useSettingsStore";
 
-interface AuthGuardProps {
+interface SetupGuardProps {
   children: React.ReactNode;
 }
 
-export default function AuthGuard({ children }: AuthGuardProps) {
-  const { authState, isLoading } = useAuthStore();
+export default function SetupGuard({ children }: SetupGuardProps) {
+  const { needsSetup, isLoading } = useSettingsStore();
   const router = useRouter();
   const segments = useSegments();
 
   useEffect(() => {
     if (isLoading) return;
 
-    const inAuthGroup = segments[0] === "auth";
+    const inSetupGroup = segments[0] === "setup";
 
-    if (!authState.hasCredentials) {
-      // No credentials exist, redirect to setup
-      if (!inAuthGroup) {
-        router.replace("/auth/setup");
-      }
-    } else if (!authState.isAuthenticated) {
-      // Credentials exist but not authenticated, redirect to login
-      if (!inAuthGroup) {
-        router.replace("/auth/login");
+    if (needsSetup()) {
+      // Setup needed, redirect to setup screen
+      if (!inSetupGroup) {
+        router.replace("/setup");
       }
     } else {
-      // Authenticated, redirect away from auth screens
-      if (inAuthGroup) {
+      // Setup complete, redirect away from setup screen
+      if (inSetupGroup) {
         router.replace("/");
       }
     }
-  }, [authState, isLoading, segments, router]);
+  }, [needsSetup, isLoading, segments, router]);
 
   if (isLoading) {
     return (

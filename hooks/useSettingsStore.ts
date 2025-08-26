@@ -10,6 +10,7 @@ export interface BusinessSettings {
   emailTemplate: string;
   logoUri?: string;
   notificationCount?: number;
+  isSetupComplete?: boolean;
 }
 
 const SETTINGS_STORAGE_KEY = 'business_settings';
@@ -21,6 +22,7 @@ const defaultSettings: BusinessSettings = {
   businessEmail: '',
   logoUri: undefined,
   notificationCount: 0,
+  isSetupComplete: false,
   emailTemplate: `Dear {clientName},
 
 Please find attached Invoice #{invoiceNumber} for your review.
@@ -118,6 +120,29 @@ export const [SettingsStoreProvider, useSettingsStore] = createContextHook(() =>
     return (settings.notificationCount || 0) < 3;
   };
 
+  // Complete initial setup
+  const completeSetup = async (setupData: {
+    businessName: string;
+    businessAddress: string;
+    businessPhone: string;
+    businessEmail: string;
+  }) => {
+    try {
+      await updateSettings({
+        ...setupData,
+        isSetupComplete: true,
+      });
+    } catch (error) {
+      console.error('Error completing setup:', error);
+      throw error;
+    }
+  };
+
+  // Check if setup is needed
+  const needsSetup = () => {
+    return !settings.isSetupComplete;
+  };
+
   return {
     settings,
     isLoading,
@@ -126,5 +151,7 @@ export const [SettingsStoreProvider, useSettingsStore] = createContextHook(() =>
     removeLogo,
     incrementNotificationCount,
     shouldShowNotification,
+    completeSetup,
+    needsSetup,
   };
 });
