@@ -5,7 +5,7 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { View, StyleSheet } from "react-native";
 
-import SetupGuard from "@/components/AuthGuard";
+import SetupGuard from "@/components/SetupGuard";
 import AppLogo from "@/components/AppLogo";
 import { InvoiceStoreProvider } from "@/hooks/useInvoiceStore";
 import { SettingsStoreProvider } from "@/hooks/useSettingsStore";
