@@ -1,9 +1,7 @@
-import * as ImagePicker from "expo-image-picker";
-import { Download, Upload, X } from "lucide-react-native";
+import { Download } from "lucide-react-native";
 import React, { useState } from "react";
 import { 
   Alert, 
-  Image as RNImage,
   KeyboardAvoidingView, 
   Platform, 
   ScrollView, 
@@ -15,6 +13,7 @@ import {
 } from "react-native";
 
 import AdBanner from "@/components/AdBanner";
+import AppLogo from "@/components/AppLogo";
 import { AD_CONFIG } from "@/constants/ads";
 import { colors } from "@/constants/colors";
 
@@ -35,7 +34,6 @@ export default function SettingsScreen() {
   const [businessPhone, setBusinessPhone] = useState(settings.businessPhone);
   const [businessEmail, setBusinessEmail] = useState(settings.businessEmail);
   const [emailTemplate, setEmailTemplate] = useState(settings.emailTemplate);
-  const [logoUri, setLogoUri] = useState(settings.logoUri);
 
   const handleSave = async () => {
     setIsLoading(true);
@@ -46,7 +44,6 @@ export default function SettingsScreen() {
         businessPhone: businessPhone.trim(),
         businessEmail: businessEmail.trim(),
         emailTemplate: emailTemplate.trim(),
-        logoUri,
       });
       
       Alert.alert("Success", "Settings saved successfully!");
@@ -72,7 +69,6 @@ export default function SettingsScreen() {
             setBusinessAddress("");
             setBusinessPhone("");
             setBusinessEmail("");
-            setLogoUri(undefined);
             setEmailTemplate(`Dear {clientName},
 
 Please find attached Invoice #{invoiceNumber} for your review.
@@ -94,39 +90,7 @@ Best regards,
     );
   };
 
-  const handleUploadLogo = async () => {
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-      
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const asset = result.assets[0];
-        setLogoUri(asset.uri);
-      }
-    } catch (error) {
-      console.error("Error picking logo:", error);
-      Alert.alert("Error", "Failed to pick logo. Please try again.");
-    }
-  };
 
-  const handleRemoveLogo = () => {
-    Alert.alert(
-      "Remove Logo",
-      "Are you sure you want to remove the logo?",
-      [
-        { text: "Cancel", style: "cancel" },
-        { 
-          text: "Remove", 
-          style: "destructive",
-          onPress: () => setLogoUri(undefined)
-        }
-      ]
-    );
-  };
 
   const handleExportCSV = async () => {
     if (invoices.length === 0) {
@@ -181,31 +145,13 @@ Best regards,
     >
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Business Logo</Text>
+          <Text style={styles.sectionTitle}>App Logo</Text>
           <Text style={styles.sectionDescription}>
-            Upload a logo that will appear on your invoice PDFs and previews.
+            Your app logo that appears throughout the application.
           </Text>
           
           <View style={styles.logoContainer}>
-            {logoUri ? (
-              <View style={styles.logoPreview}>
-                <RNImage source={{ uri: logoUri }} style={styles.logoImage} />
-                <TouchableOpacity
-                  style={styles.removeLogoButton}
-                  onPress={handleRemoveLogo}
-                >
-                  <X size={16} color={colors.danger} />
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <TouchableOpacity
-                style={styles.uploadLogoButton}
-                onPress={handleUploadLogo}
-              >
-                <Upload size={24} color={colors.primary} />
-                <Text style={styles.uploadLogoText}>Upload Logo</Text>
-              </TouchableOpacity>
-            )}
+            <AppLogo size={150} onPress={() => {}} />
           </View>
         </View>
 
@@ -417,52 +363,15 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: "center",
     marginBottom: 16,
-  },
-  logoPreview: {
-    position: "relative",
-    alignItems: "center",
-  },
-  logoImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 8,
-    backgroundColor: colors.card,
-  },
-  removeLogoButton: {
-    position: "absolute",
-    top: -8,
-    right: -8,
     backgroundColor: colors.card,
     borderRadius: 12,
-    width: 24,
-    height: 24,
-    alignItems: "center",
-    justifyContent: "center",
+    paddingVertical: 24,
+    paddingHorizontal: 32,
     shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     elevation: 3,
-  },
-  uploadLogoButton: {
-    backgroundColor: colors.card,
-    borderRadius: 8,
-    paddingVertical: 32,
-    paddingHorizontal: 24,
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderStyle: "dashed",
-    width: 120,
-    height: 120,
-    justifyContent: "center",
-  },
-  uploadLogoText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: colors.primary,
-    marginTop: 8,
-    textAlign: "center",
   },
   exportButton: {
     flexDirection: "row",
