@@ -1,7 +1,8 @@
-import { Download } from "lucide-react-native";
+import { Download, Upload, X } from "lucide-react-native";
 import React, { useState } from "react";
 import { 
   Alert, 
+  Image,
   KeyboardAvoidingView, 
   Platform, 
   ScrollView, 
@@ -11,9 +12,10 @@ import {
   TouchableOpacity, 
   View 
 } from "react-native";
+import * as ImagePicker from 'expo-image-picker';
 
 
-import AppLogo from "@/components/AppLogo";
+
 
 import { colors } from "@/constants/colors";
 
@@ -34,6 +36,7 @@ export default function SettingsScreen() {
   const [businessPhone, setBusinessPhone] = useState(settings.businessPhone);
   const [businessEmail, setBusinessEmail] = useState(settings.businessEmail);
   const [emailTemplate, setEmailTemplate] = useState(settings.emailTemplate);
+  const [companyLogo, setCompanyLogo] = useState(settings.logoUri);
 
   const handleSave = async () => {
     setIsLoading(true);
@@ -44,6 +47,7 @@ export default function SettingsScreen() {
         businessPhone: businessPhone.trim(),
         businessEmail: businessEmail.trim(),
         emailTemplate: emailTemplate.trim(),
+        logoUri: companyLogo,
       });
       
       Alert.alert("Success", "Settings saved successfully!");
@@ -84,13 +88,61 @@ Thank you for your business!
 
 Best regards,
 {businessName}`);
+            setCompanyLogo(undefined);
           }
         }
       ]
     );
   };
 
+  const pickImage = async () => {
+    try {
+      // Request permission
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (permissionResult.granted === false) {
+        Alert.alert(
+          "Permission Required",
+          "Permission to access camera roll is required to upload your company logo."
+        );
+        return;
+      }
 
+      // Launch image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [16, 10], // Good aspect ratio for logos
+        quality: 0.8,
+        allowsMultipleSelection: false,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setCompanyLogo(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert(
+        "Error",
+        "Failed to pick image. Please try again."
+      );
+    }
+  };
+
+  const removeCompanyLogo = () => {
+    Alert.alert(
+      "Remove Logo",
+      "Are you sure you want to remove your company logo?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Remove", 
+          style: "destructive",
+          onPress: () => setCompanyLogo(undefined)
+        }
+      ]
+    );
+  };
 
   const handleExportCSV = async () => {
     if (invoices.length === 0) {
@@ -145,14 +197,42 @@ Best regards,
     >
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>App Logo</Text>
+          <Text style={styles.sectionTitle}>Company Logo</Text>
           <Text style={styles.sectionDescription}>
-            Your app logo that appears throughout the application.
+            Your company logo will show on your invoices. This is an optional feature.
           </Text>
           
           <View style={styles.logoContainer}>
-            <AppLogo size={150} onPress={() => {}} />
+            {companyLogo ? (
+              <View style={styles.logoPreviewContainer}>
+                <Image
+                  source={{ uri: companyLogo }}
+                  style={styles.logoPreview}
+                  resizeMode="contain"
+                />
+                <TouchableOpacity
+                  style={styles.removeLogoButton}
+                  onPress={removeCompanyLogo}
+                >
+                  <X size={16} color={colors.card} />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.noLogoContainer}>
+                <Text style={styles.noLogoText}>No logo selected</Text>
+              </View>
+            )}
           </View>
+          
+          <TouchableOpacity
+            style={styles.uploadButton}
+            onPress={pickImage}
+          >
+            <Upload size={20} color={colors.primary} />
+            <Text style={styles.uploadButtonText}>
+              {companyLogo ? 'Change Logo' : 'Upload Logo'}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.section}>
@@ -372,6 +452,58 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    minHeight: 120,
+    justifyContent: 'center',
+  },
+  logoPreviewContainer: {
+    position: 'relative',
+    alignItems: 'center',
+  },
+  logoPreview: {
+    width: 150,
+    height: 90,
+    borderRadius: 8,
+  },
+  removeLogoButton: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: colors.error,
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  noLogoContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+  },
+  noLogoText: {
+    fontSize: 14,
+    color: colors.textLight,
+    fontStyle: 'italic',
+  },
+  uploadButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.card,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+    justifyContent: 'center',
+  },
+  uploadButtonText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: colors.primary,
+    marginLeft: 8,
   },
   exportButton: {
     flexDirection: "row",
