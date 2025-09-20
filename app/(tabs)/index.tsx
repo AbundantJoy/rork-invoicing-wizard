@@ -3,13 +3,11 @@ import { Plus } from "lucide-react-native";
 import React, { useState } from "react";
 import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 
-import AdBanner from "@/components/AdBanner";
 import EmptyState from "@/components/EmptyState";
 import InvoiceCard from "@/components/InvoiceCard";
-import NativeAd from "@/components/NativeAd";
 import StatusTabs from "@/components/StatusTabs";
 import YearSummary from "@/components/YearSummary";
-import { AD_CONFIG } from "@/constants/ads";
+
 import { colors } from "@/constants/colors";
 import { useFilteredInvoices, useInvoiceCounts, useYearlySummary } from "@/hooks/useInvoiceStore";
 import { InvoiceStatus } from "@/types/invoice";
@@ -29,27 +27,15 @@ export default function InvoicesScreen() {
   };
 
   const renderEmptyState = () => (
-    <>
-      <EmptyState
-        title="No Invoices Yet"
-        message="Create your first invoice to get started."
-        onAddPress={handleCreateInvoice}
-      />
-      {AD_CONFIG.SHOW_ADS_ON_HOME && <AdBanner size="medium" />}
-    </>
+    <EmptyState
+      title="No Invoices Yet"
+      message="Create your first invoice to get started."
+      onAddPress={handleCreateInvoice}
+    />
   );
 
-  const renderInvoiceItem = ({ item, index }: { item: any; index: number }) => {
-    const shouldShowNativeAd = AD_CONFIG.SHOW_NATIVE_ADS && 
-      index > 0 && 
-      index % AD_CONFIG.NATIVE_AD_FREQUENCY === 0;
-    
-    return (
-      <>
-        <InvoiceCard invoice={item} />
-        {shouldShowNativeAd && <NativeAd />}
-      </>
-    );
+  const renderInvoiceItem = ({ item }: { item: any }) => {
+    return <InvoiceCard invoice={item} />;
   };
 
   return (
@@ -58,7 +44,7 @@ export default function InvoicesScreen() {
         data={invoices}
         keyExtractor={(item) => item.id}
         renderItem={renderInvoiceItem}
-        ListFooterComponent={AD_CONFIG.SHOW_ADS_ON_HOME ? <AdBanner /> : null}
+        ListFooterComponent={null}
         ListHeaderComponent={
           <>
             <YearSummary

@@ -9,10 +9,10 @@ export const AD_CONFIG = {
   TEST_NATIVE_ID: 'ca-app-pub-3940256099942544/3986624511',
   
   // Ad placement settings
-  SHOW_ADS_ON_HOME: true,
-  SHOW_ADS_ON_INVOICE_LIST: true,
-  SHOW_ADS_ON_CLIENT_LIST: true,
-  SHOW_NATIVE_ADS: true,
+  SHOW_ADS_ON_HOME: false,
+  SHOW_ADS_ON_INVOICE_LIST: false,
+  SHOW_ADS_ON_CLIENT_LIST: false,
+  SHOW_NATIVE_ADS: false,
   
   // Ad frequency settings
   BANNER_REFRESH_INTERVAL: 30000, // 30 seconds

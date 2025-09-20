@@ -3,11 +3,9 @@ import { Plus, Search, UserPlus } from "lucide-react-native";
 import React, { useState } from "react";
 import { FlatList, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 
-import AdBanner from "@/components/AdBanner";
 import ClientCard from "@/components/ClientCard";
 import EmptyState from "@/components/EmptyState";
-import NativeAd from "@/components/NativeAd";
-import { AD_CONFIG } from "@/constants/ads";
+
 import { colors } from "@/constants/colors";
 import { useInvoiceStore } from "@/hooks/useInvoiceStore";
 
@@ -26,28 +24,16 @@ export default function ClientsScreen() {
   };
 
   const renderEmptyState = () => (
-    <>
-      <EmptyState
-        title="No Clients Yet"
-        message="Add your first client to get started."
-        onAddPress={handleAddClient}
-        icon={<UserPlus size={48} color={colors.primaryLight} />}
-      />
-      {AD_CONFIG.SHOW_ADS_ON_CLIENT_LIST && <AdBanner size="medium" />}
-    </>
+    <EmptyState
+      title="No Clients Yet"
+      message="Add your first client to get started."
+      onAddPress={handleAddClient}
+      icon={<UserPlus size={48} color={colors.primaryLight} />}
+    />
   );
 
-  const renderClientItem = ({ item, index }: { item: any; index: number }) => {
-    const shouldShowNativeAd = AD_CONFIG.SHOW_NATIVE_ADS && 
-      index > 0 && 
-      index % AD_CONFIG.NATIVE_AD_FREQUENCY === 0;
-    
-    return (
-      <>
-        <ClientCard client={item} />
-        {shouldShowNativeAd && <NativeAd />}
-      </>
-    );
+  const renderClientItem = ({ item }: { item: any }) => {
+    return <ClientCard client={item} />;
   };
 
   return (
@@ -63,8 +49,6 @@ export default function ClientsScreen() {
         />
       </View>
       
-      {AD_CONFIG.SHOW_ADS_ON_CLIENT_LIST && <AdBanner style={{ marginHorizontal: 16 }} />}
-
       <FlatList
         data={filteredClients}
         keyExtractor={(item) => item.id}

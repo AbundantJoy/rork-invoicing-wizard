@@ -12,9 +12,9 @@ import {
   View 
 } from "react-native";
 
-import AdBanner from "@/components/AdBanner";
+
 import AppLogo from "@/components/AppLogo";
-import { AD_CONFIG } from "@/constants/ads";
+
 import { colors } from "@/constants/colors";
 
 import { useInvoiceStore } from "@/hooks/useInvoiceStore";
@@ -262,7 +262,7 @@ Best regards,
           </TouchableOpacity>
         </View>
 
-        {AD_CONFIG.SHOW_ADS_ON_HOME && <AdBanner size="medium" />}
+
       </ScrollView>
     </KeyboardAvoidingView>
   );
