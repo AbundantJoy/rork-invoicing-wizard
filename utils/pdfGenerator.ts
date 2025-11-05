@@ -1,7 +1,7 @@
 import { Invoice } from '@/types/invoice';
 import { BusinessSettings } from '@/hooks/useSettingsStore';
 import { formatCurrency, formatDate } from './formatters';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { Platform } from 'react-native';
 
 // Helper function to convert local file URIs to base64 data URIs
@@ -20,7 +20,7 @@ async function convertReceiptToDataUri(receiptUri: string): Promise<string> {
       // For mobile, convert file URI to base64
       if (receiptUri.startsWith('file://')) {
         const base64 = await FileSystem.readAsStringAsync(receiptUri, {
-          encoding: FileSystem.EncodingType.Base64,
+          encoding: 'base64',
         });
         // Determine MIME type based on file extension
         const extension = receiptUri.split('.').pop()?.toLowerCase();

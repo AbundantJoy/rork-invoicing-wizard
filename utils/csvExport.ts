@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { Invoice } from '@/types/invoice';
 
@@ -152,7 +152,7 @@ export async function exportInvoicesToCSV(invoices: Invoice[]): Promise<void> {
       // Mobile sharing
       const fileUri = `${FileSystem.documentDirectory}${fileName}`;
       await FileSystem.writeAsStringAsync(fileUri, csvContent, {
-        encoding: FileSystem.EncodingType.UTF8,
+        encoding: 'utf8',
       });
       
       if (await Sharing.isAvailableAsync()) {

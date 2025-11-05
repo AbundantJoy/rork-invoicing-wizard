@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Print from 'expo-print';
 import { Invoice } from '@/types/invoice';
 import { BusinessSettings } from '@/hooks/useSettingsStore';
@@ -58,6 +58,9 @@ export async function generatePDFFile(invoice: Invoice, settings: BusinessSettin
         
         // Move the PDF to a permanent location
         const fileName = createPDFFileName(invoice);
+        if (!FileSystem.documentDirectory) {
+          return { success: false, error: 'Document directory not available' };
+        }
         const permanentUri = `${FileSystem.documentDirectory}${fileName}`;
         
         await FileSystem.moveAsync({
