@@ -86,7 +86,7 @@ export default function SetupScreen() {
         <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.header}>
             <AppLogo size={120} />
-            <Text style={styles.title}>Welcome to Invoice Pro</Text>
+            <Text style={styles.title}>Welcome to Instant Invoice</Text>
             <Text style={styles.subtitle}>
               Let&apos;s set up your business details to get started with creating professional invoices.
             </Text>
